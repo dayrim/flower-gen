@@ -1,17 +1,35 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
+
+import * as WebFont from "webfontloader";
+import { ThemeProvider } from "@material-ui/styles";
+import React from "react";
+import ReactDOM from "react-dom";
+import { BrowserRouter } from "react-router-dom";
+
+import { App } from "modules";
+
 import reportWebVitals from './reportWebVitals';
+import "./assets/global.scss";
+import theme from "./theme";
+import fonts from "./fonts";
 
-ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-  document.getElementById('root')
-);
+console.log("🍪");
+const bootstrap = async () => {
+  console.log(theme, "theme");
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
+  WebFont.load({
+    google: {
+      families: fonts,
+    },
+  });
+  ReactDOM.render(
+    <ThemeProvider theme={theme}>
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </ThemeProvider>,
+    document.getElementById("root")
+  );
+};
+
+bootstrap();
 reportWebVitals();
