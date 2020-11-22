@@ -1,0 +1,22 @@
+{
+  "files": {
+    "main.css": "/flower-gen/static/css/main.f83ad6f8.chunk.css",
+    "main.js": "/flower-gen/static/js/main.28edbf9d.chunk.js",
+    "main.js.map": "/flower-gen/static/js/main.28edbf9d.chunk.js.map",
+    "runtime-main.js": "/flower-gen/static/js/runtime-main.3af7613d.js",
+    "runtime-main.js.map": "/flower-gen/static/js/runtime-main.3af7613d.js.map",
+    "static/js/2.0b7c175b.chunk.js": "/flower-gen/static/js/2.0b7c175b.chunk.js",
+    "static/js/2.0b7c175b.chunk.js.map": "/flower-gen/static/js/2.0b7c175b.chunk.js.map",
+    "static/js/3.6e08c08a.chunk.js": "/flower-gen/static/js/3.6e08c08a.chunk.js",
+    "static/js/3.6e08c08a.chunk.js.map": "/flower-gen/static/js/3.6e08c08a.chunk.js.map",
+    "index.html": "/flower-gen/index.html",
+    "static/css/main.f83ad6f8.chunk.css.map": "/flower-gen/static/css/main.f83ad6f8.chunk.css.map",
+    "static/js/2.0b7c175b.chunk.js.LICENSE.txt": "/flower-gen/static/js/2.0b7c175b.chunk.js.LICENSE.txt"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.3af7613d.js",
+    "static/js/2.0b7c175b.chunk.js",
+    "static/css/main.f83ad6f8.chunk.css",
+    "static/js/main.28edbf9d.chunk.js"
+  ]
+}
