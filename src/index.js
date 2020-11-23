@@ -4,6 +4,7 @@ import { ThemeProvider } from "@material-ui/styles";
 import React from "react";
 import ReactDOM from "react-dom";
 import { BrowserRouter } from "react-router-dom";
+import { OrbitControls, Html, draco } from 'drei'
 
 import { App } from "modules";
 
