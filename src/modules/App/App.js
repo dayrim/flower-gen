@@ -9,6 +9,8 @@ import {
   Flow,
   InstancedFlow,
 } from "three/examples/jsm/modifiers/CurveModifier.js";
+import { BufferGeometryUtils } from "three/examples/jsm/utils/BufferGeometryUtils.js";
+import { SubdivisionModifier } from "three/examples/jsm/modifiers/SubdivisionModifier.js";
 import { OrbitControls, Html, Plane } from "drei";
 
 import elevation from "../../assets/elevation.png";
@@ -17,6 +19,7 @@ import five from "../../assets/five.jpg";
 
 import useStyles from "./App.style";
 
+const color = (scheme) => "#" + getRandom(scheme.colors());
 const Phi = (1 + Math.sqrt(5)) / 2;
 const goldenAngle = THREE.Math.degToRad(360 - 360 / Phi);
 const getRandom = (items) => items[Math.floor(Math.random() * items.length)];
@@ -32,43 +35,43 @@ const Flower = ({
   alongCurve,
 }) => {
   const groupRef = useRef();
-
-  const curves = Array(leafs)
-    .fill("")
-    .map(
-      (_, index) => {
-        const points = [
-          new THREE.Vector3(initX, initY, 0),
-          new THREE.Vector3(initX, initY + leafHeight / 2, 70),
-          new THREE.Vector3(initX, initY + leafHeight, 0),
-        ];
-        const rotation = new THREE.Euler(0, 0, goldenAngle * (index + 1));
-        const curve = new THREE.CatmullRomCurve3(
-          points.map((curvePoint) => curvePoint.applyEuler(rotation))
-        );
-        curve.curveType = "centripetal";
-        curve.closed = true;
-        return curve;
-      },
-      [leafHeight, initX, initY]
-    );
-
-  const color = useMemo(() => {
+  const scheme = useMemo(() => {
     const scheme = new ColorScheme();
     scheme
       .from_hue(leafHue)
       .scheme("analogic")
-      .distance(0.05)
+      .distance(0.01)
       .variation("soft");
-    return "#" + getRandom(scheme.colors());
+    return scheme;
   }, [leafHue]);
 
-  const leafMaterial = useMemo(
+  const curves = useMemo(
     () =>
-      new THREE.MeshStandardMaterial({
-        color,
-      }),
-    [color]
+      Array(leafs)
+        .fill("")
+        .map((_, index) => {
+          const points = [
+            new THREE.Vector3(initX, initY, 0),
+            new THREE.Vector3(initX, initY + leafHeight / 2, 40),
+            new THREE.Vector3(initX, initY + leafHeight, 0),
+          ];
+          const rotation = new THREE.Euler(0, 0, goldenAngle * (index + 1));
+          const curve = new THREE.CatmullRomCurve3(
+            points.map((curvePoint) => curvePoint.applyEuler(rotation))
+          );
+          curve.curveType = "centripetal";
+          curve.closed = true;
+
+          const lineGeometry = new THREE.BufferGeometry().setFromPoints(
+            curve.getPoints(30)
+          );
+          const lineMaterial = new THREE.LineBasicMaterial({
+            color: color(scheme),
+          });
+          const line = new THREE.Line(lineGeometry, lineMaterial);
+          return { curve, line };
+        }),
+    [leafHeight, initX, initY, leafs, scheme]
   );
 
   const leafGeometry = useMemo(() => {
@@ -102,28 +105,36 @@ const Flower = ({
       extrudeSettings
     );
     geometry.rotateZ(THREE.Math.degToRad(270));
-    return geometry;
+    const modifier = new SubdivisionModifier(3);
+
+    const smoothGeometry = modifier.modify(geometry);
+    console.log("LEAF GEMETRY MEMO");
+    return smoothGeometry;
   }, [leafWidth, leafHeight, initX, initY]);
 
-  const flow = useMemo(() => {
-    if (groupRef.current) {
-      const flow = new InstancedFlow(leafs, leafs, leafGeometry, leafMaterial);
-      console.log(flow.object3D, "flow.object3D");
-      groupRef.current.add(flow.object3D);
+  const flows = useMemo(() => {
+    if (groupRef.current && curves?.length) {
+      console.log("FLOW CURVE MEMO");
 
-      return flow;
-    }
-  }, [leafGeometry, leafMaterial, leafs]);
-  console.log(flow, "flow");
-  console.log(curves, "curves");
-  useEffect(() => {
-    if (flow && curves?.length) {
-      curves.forEach((curve, index) => {
-        flow.updateCurve(index, curve);
-        flow.setCurve(index, index);
+      return curves.map(({ curve, line }, index) => {
+        const leafMaterial = new THREE.MeshStandardMaterial({
+          color: color(scheme),
+        });
+        const leafMesh = new THREE.Mesh(leafGeometry, leafMaterial);
+
+        const flow = new Flow(leafMesh);
+
+        flow.updateCurve(0, curve);
+        groupRef.current.add(flow.object3D);
+        // groupRef.current.add(line);
+        return flow;
       });
     }
-  }, [flow, curves]);
+  }, [curves, leafGeometry, scheme]);
+
+  useFrame(() => {
+    if (flows?.length) flows.forEach((flow) => flow.moveAlongCurve(0.001));
+  });
   return (
     <group ref={groupRef}>
       {/* {Array(leafs)
@@ -374,6 +385,7 @@ const App = () => {
               scene={sceneRef}
               leafHeight={height}
               leafWidth={width}
+              alongCurve={alongCurve}
               leafHue={hue}
             ></Flower>
           </scene>
